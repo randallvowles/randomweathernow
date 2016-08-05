@@ -17,7 +17,7 @@ ACCESS_TOKEN_SECRET = config.get('randomweatherbot', 'ACCESS_TOKEN_SECRET')
 token = config.get('randomweatherbot', 'token')
 AUTH = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 AUTH.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-api = tweepy.API(AUTH)
+api = tweepy.api(AUTH)
 parameters = '&token='+token+'&status=active&' + \
             'units=english&obtimezone=local&qc=all&vars=air_temp&recent=60'
 baseURL = 'http://api.mesowest.net/v2/stations/'
