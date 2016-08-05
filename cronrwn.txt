@@ -1,4 +1,4 @@
 SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
-*/15 * * * * /home/pi/randomweathernow/randomweathernow.py > /home/pi/twitterbot/randomlog.log 2>&1
+*/15 * * * * /home/pi/randomweathernow/randomweathernow.py > /home/pi/randomweathernow/randomlog.log 2>&1
