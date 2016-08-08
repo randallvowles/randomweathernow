@@ -20,7 +20,7 @@ auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 api = tweepy.API(auth)
 parameters = '&token='+token+'&status=active&' + \
-            'units=english&obtimezone=local&qc=all&vars=air_temp&recent=60'
+            'units=english&obtimezone=local&qc=all&vars=air_temp&recent=120'
 baseURL = 'http://api.mesowest.net/v2/stations/'
 # blacklist=[134, 203, 192, 92, 106, 48, 77, 126, 211, 197, 146, 196,
 # 131, 23, 72, 208, 169, 80, 65]
