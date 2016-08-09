@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/uufs/chpc.utah.edu/common/home/u0540701/MyVenv/bin/python3
 
 # Created by Randall Vowles, API token and twitter account belong to me
 import configparser
@@ -121,7 +121,7 @@ m_st = r2[mi]['STATE']
 mesolink2 = ' http://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=' \
              + m_stid
 mtresult = 'The current high temperature in the state of '+m_st+', is ' + \
-            str(mt_t) + u'\N{DEGREE SIGN}' + 'F at ' + m_name + mesolink2
+            str(mt_t) + u'\N{DEGREE SIGN}' + 'F ' + mesolink2
 #print(mtresult)
 api.update_status(mtresult)
 time.sleep(300)
@@ -145,7 +145,7 @@ m2_st = s2[mi2]['STATE']
 mesolink3 = ' http://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=' \
              + m2_stid
 mt2result = 'The current low temperature in the state of ' + m2_st + ', is ' +\
-             str(mt2_t)+u'\N{DEGREE SIGN}'+'F at '+m2_name + mesolink3
+             str(mt2_t)+u'\N{DEGREE SIGN}'+'F ' + mesolink3
 #print(mt2result)
 api.update_status(mt2result)
 sys.exit()
