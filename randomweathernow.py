@@ -8,6 +8,7 @@ import sys
 import tweepy
 import requests
 import simplejson
+#import bitly_api
 config = configparser.ConfigParser()
 config.read(r'./rwnconfig.txt')
 sectionheader = config.sections()
@@ -16,6 +17,9 @@ CONSUMER_SECRET = config.get(sectionheader[0], 'CONSUMER_SECRET')
 ACCESS_TOKEN = config.get(sectionheader[0], 'ACCESS_TOKEN')
 ACCESS_TOKEN_SECRET = config.get(sectionheader[0], 'ACCESS_TOKEN_SECRET')
 token = config.get(sectionheader[0], 'token')
+#API_USER = config.get(sectionheader[0], 'API_USER')
+#API_KEY = config.get(sectionheader[0], 'API_KEY')
+#b = bitly_api.BitLy(API_USER, API_KEY)
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 api = tweepy.API(auth)
@@ -27,7 +31,7 @@ baseURL = 'http://api.mesowest.net/v2/stations/'
 good_networks = [1, 2, 3, 4, 5, 8, 11, 13, 15, 16, 17, 22, 25, 26, 29, 36, 39,
                  41, 45, 49, 54, 55, 56, 57, 59, 60, 62, 63, 66, 70, 82, 83,
                  84, 85, 88, 89, 90, 91, 93, 97, 98, 99, 100, 101, 102, 103,
-                 104, 105, 107, 109, 110, 118, 119, 123, 125, 132, 136, 137,
+                 104, 105, 107, 109, 110, 118, 119, 125, 132, 136, 137,
                  139, 143, 150, 151, 153, 158, 160, 162, 170, 182, 183, 187,
                  188, 191, 194, 195, 199, 201, 206, 207, 208, 209, 212, 213]
 network_id = random.choice(good_networks)
@@ -83,8 +87,12 @@ else:
     wqtemp1 = str(wqtemp)+u'\N{DEGREE SIGN}'+'F'
 wq1sn = wq1['STATION'][0]['NAME']
 wq1st = wq1['STATION'][0]['STATE']
-wqresult = 'The current weather at ' + wq1sn + ', '+wq1st+' is ' + wqtemp1
-#print(wqresult)
+mesolink1 = ' http://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=' \
+             + stid
+#response1 = b.shorten(longUrl=mesolink1)
+wqresult = 'The current weather at ' + wq1sn + ', '+wq1st+' is ' + wqtemp1 \
+           + mesolink1
+print(wqresult)
 api.update_status(wqresult)
 #time.sleep(300)
 all_states = ['al', 'ak', 'az', 'ar', 'ca', 'co', 'ct', 'de', 'fl', 'ga',
@@ -111,7 +119,7 @@ m_stid = r2[mi]['STID']
 m_st = r2[mi]['STATE']
 mtresult = 'The current high temperature in the state of '+m_st+', is ' + \
             str(mt_t) + u'\N{DEGREE SIGN}' + 'F at ' + m_name
-#print(mtresult)
+print(mtresult)
 api.update_status(mtresult)
 #time.sleep(300)
 random_state2 = random.choice(all_states)
@@ -133,6 +141,6 @@ m2_stid = s2[mi2]['STID']
 m2_st = s2[mi2]['STATE']
 mt2result = 'The current low temperature in the state of ' + m2_st + ', is ' +\
              str(mt2_t)+u'\N{DEGREE SIGN}'+'F at '+m2_name
-#print(mt2result)
+print(mt2result)
 api.update_status(mt2result)
-sys.exit()
+#sys.exit()
