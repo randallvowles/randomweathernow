@@ -13,10 +13,10 @@ config = configparser.ConfigParser()
 config.read(r'./rwnconfig.txt')
 sectionheader = config.sections()
 section = sectionheader[0]
-CONSUMER_KEY = config.get(section, 'CONSUMER_KEY')
-CONSUMER_SECRET = config.get(section, 'CONSUMER_SECRET')
-ACCESS_TOKEN = config.get(section, 'ACCESS_TOKEN')
-ACCESS_TOKEN_SECRET = config.get(section, 'ACCESS_TOKEN_SECRET')
+CONSUMER_KEY = config.get('rwn', 'CONSUMER_KEY')
+CONSUMER_SECRET = config.get('rwn', 'CONSUMER_SECRET')
+ACCESS_TOKEN = config.get('rwn', 'ACCESS_TOKEN')
+ACCESS_TOKEN_SECRET = config.get('rwn', 'ACCESS_TOKEN_SECRET')
 token = config.get(section, 'token')
 #API_USER = config.get(sectionheader[0], 'API_USER')
 #API_KEY = config.get(sectionheader[0], 'API_KEY')
@@ -95,7 +95,7 @@ wqresult = 'The current weather at ' + wq1sn + ', '+wq1st+' is ' + wqtemp1 \
            + mesolink1
 #print(wqresult)
 api.update_status(wqresult)
-time.sleep(300)
+#time.sleep(300)
 all_states = ['al', 'ak', 'az', 'ar', 'ca', 'co', 'ct', 'de', 'fl', 'ga',
               'hi', 'id', 'il', 'in', 'ia', 'ks', 'ky', 'la', 'me', 'md',
               'ma', 'mi', 'mn', 'ms', 'mo', 'mt', 'ne', 'nv', 'nh', 'nj',
@@ -124,7 +124,7 @@ mtresult = 'The current high temperature in the state of '+m_st+', is ' + \
             str(mt_t) + u'\N{DEGREE SIGN}' + 'F ' + mesolink2
 #print(mtresult)
 api.update_status(mtresult)
-time.sleep(300)
+#time.sleep(300)
 random_state2 = random.choice(all_states)
 s = requests.get(baseURL + 'timeseries?&state=' + random_state2 + parameters)
 s1 = simplejson.loads(s.content)
