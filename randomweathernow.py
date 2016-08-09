@@ -117,8 +117,10 @@ mt_t = round(mt, 1)
 m_name = r2[mi]['NAME']
 m_stid = r2[mi]['STID']
 m_st = r2[mi]['STATE']
+mesolink2 = ' http://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=' \
+             + m_stid
 mtresult = 'The current high temperature in the state of '+m_st+', is ' + \
-            str(mt_t) + u'\N{DEGREE SIGN}' + 'F at ' + m_name
+            str(mt_t) + u'\N{DEGREE SIGN}' + 'F at ' + m_name + mesolink2
 print(mtresult)
 api.update_status(mtresult)
 #time.sleep(300)
@@ -139,8 +141,10 @@ mt2_t = round(mt2, 1)
 m2_name = s2[mi2]['NAME']
 m2_stid = s2[mi2]['STID']
 m2_st = s2[mi2]['STATE']
+mesolink3 = ' http://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=' \
+             + m2_stid
 mt2result = 'The current low temperature in the state of ' + m2_st + ', is ' +\
-             str(mt2_t)+u'\N{DEGREE SIGN}'+'F at '+m2_name
+             str(mt2_t)+u'\N{DEGREE SIGN}'+'F at '+m2_name + mesolink3
 print(mt2result)
 api.update_status(mt2result)
 #sys.exit()
