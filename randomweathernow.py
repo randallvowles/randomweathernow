@@ -11,11 +11,14 @@ import simplejson
 #import bitly_api
 config = configparser.ConfigParser()
 config.read(r'./rwnconfig.txt')
-CONSUMER_KEY = config.get('rwn', 'CONSUMER_KEY')
-CONSUMER_SECRET = config.get('rwn', 'CONSUMER_SECRET')
-ACCESS_TOKEN = config.get('rwn', 'ACCESS_TOKEN')
-ACCESS_TOKEN_SECRET = config.get('rwn', 'ACCESS_TOKEN_SECRET')
-token = config.get('rwn', 'token')
+sectionheader = config.sections()
+for k in range(len(sectionheader)):
+    section = sectionheader[k]
+CONSUMER_KEY = config.get(section, 'CONSUMER_KEY')
+CONSUMER_SECRET = config.get(section, 'CONSUMER_SECRET')
+ACCESS_TOKEN = config.get(section, 'ACCESS_TOKEN')
+ACCESS_TOKEN_SECRET = config.get(section, 'ACCESS_TOKEN_SECRET')
+token = config.get(section, 'token')
 #API_USER = config.get(sectionheader[0], 'API_USER')
 #API_KEY = config.get(sectionheader[0], 'API_KEY')
 #b = bitly_api.BitLy(API_USER, API_KEY)
