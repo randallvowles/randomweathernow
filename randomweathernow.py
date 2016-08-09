@@ -93,9 +93,9 @@ mesolink1 = ' http://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=' \
 #response1 = b.shorten(longUrl=mesolink1)
 wqresult = 'The current weather at ' + wq1sn + ', '+wq1st+' is ' + wqtemp1 \
            + mesolink1
-print(wqresult)
+#print(wqresult)
 api.update_status(wqresult)
-#time.sleep(300)
+time.sleep(300)
 all_states = ['al', 'ak', 'az', 'ar', 'ca', 'co', 'ct', 'de', 'fl', 'ga',
               'hi', 'id', 'il', 'in', 'ia', 'ks', 'ky', 'la', 'me', 'md',
               'ma', 'mi', 'mn', 'ms', 'mo', 'mt', 'ne', 'nv', 'nh', 'nj',
@@ -122,9 +122,9 @@ mesolink2 = ' http://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=' \
              + m_stid
 mtresult = 'The current high temperature in the state of '+m_st+', is ' + \
             str(mt_t) + u'\N{DEGREE SIGN}' + 'F at ' + m_name + mesolink2
-print(mtresult)
+#print(mtresult)
 api.update_status(mtresult)
-#time.sleep(300)
+time.sleep(300)
 random_state2 = random.choice(all_states)
 s = requests.get(baseURL + 'timeseries?&state=' + random_state2 + parameters)
 s1 = simplejson.loads(s.content)
@@ -146,6 +146,6 @@ mesolink3 = ' http://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=' \
              + m2_stid
 mt2result = 'The current low temperature in the state of ' + m2_st + ', is ' +\
              str(mt2_t)+u'\N{DEGREE SIGN}'+'F at '+m2_name + mesolink3
-print(mt2result)
+#print(mt2result)
 api.update_status(mt2result)
-#sys.exit()
+sys.exit()
