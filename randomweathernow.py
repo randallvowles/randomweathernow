@@ -97,7 +97,7 @@ wqresult = 'The current weather at ' + wq1sn + ', '+wq1st+' is ' + wqtemp1 \
            + mesolink1
 #print(wqresult)
 api.update_status(wqresult)
-time.sleep(300)
+#time.sleep(300)
 all_states = ['al', 'ak', 'az', 'ar', 'ca', 'co', 'ct', 'de', 'fl', 'ga',
               'hi', 'id', 'il', 'in', 'ia', 'ks', 'ky', 'la', 'me', 'md',
               'ma', 'mi', 'mn', 'ms', 'mo', 'mt', 'ne', 'nv', 'nh', 'nj',
@@ -126,7 +126,7 @@ mtresult = 'The current high temperature in the state of '+m_st+', is ' + \
             str(mt_t) + u'\N{DEGREE SIGN}' + 'F ' + mesolink2
 #print(mtresult)
 api.update_status(mtresult)
-time.sleep(300)
+#time.sleep(300)
 random_state2 = random.choice(all_states)
 s = requests.get(baseURL + 'timeseries?&state=' + random_state2 + parameters)
 s1 = simplejson.loads(s.content)
