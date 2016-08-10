@@ -12,6 +12,7 @@ import simplejson
 config = configparser.ConfigParser()
 config.read(r'./rwnconfig.txt')
 sectionheader = config.sections()
+section = []
 for k in range(len(sectionheader)):
     section = sectionheader[k]
 CONSUMER_KEY = config.get(section, 'CONSUMER_KEY')
