@@ -10,7 +10,7 @@ import requests
 import simplejson
 #import bitly_api
 config = configparser.ConfigParser()
-config.read(r'./rwnconfig.txt')
+config.read(r'/uufs/chpc.utah.edu/common/home/u0540701/randomweathernow/rwnconfig.txt')
 sectionheader = config.sections()
 section = []
 for k in range(len(sectionheader)):
