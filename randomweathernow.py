@@ -9,7 +9,7 @@ import tweepy
 import requests
 import simplejson
 config = configparser.ConfigParser()
-config.read(r'/uufs/chpc.utah.edu/common/home/u0540701/randomweathernow/rwnconfig.txt') #.
+config.read(r'./rwnconfig.txt') #/uufs/chpc.utah.edu/common/home/u0540701/randomweathernow
 CONSUMER_KEY = config.get('rwn', 'CONSUMER_KEY')
 CONSUMER_SECRET = config.get('rwn', 'CONSUMER_SECRET')
 ACCESS_TOKEN = config.get('rwn', 'ACCESS_TOKEN')
@@ -28,7 +28,7 @@ good_networks = [1, 2, 3, 4, 5, 8, 11, 13, 15, 16, 17, 22, 25, 26, 29, 36, 39,
                  84, 85, 88, 89, 90, 91, 93, 97, 98, 99, 100, 101, 102, 103,
                  104, 105, 107, 109, 110, 118, 119, 125, 132, 136, 137,
                  139, 143, 150, 151, 153, 158, 160, 162, 170, 182, 183, 187,
-                 188, 191, 194, 195, 199, 201, 206, 207, 208, 209, 212, 213]
+                 188, 191, 194, 195, 199, 201, 206, 207, 209, 212, 213]
 network_id = random.choice(good_networks)
 sq = requests.get(baseURL+'metadata?'+parameters+'&network='+str(network_id))
 sq1 = simplejson.loads(sq.content)
@@ -37,58 +37,57 @@ stid = random_station['STID']
 # print(stid)
 wq = requests.get(baseURL + 'timeseries?' + parameters + '&stid=' + stid)
 wq1 = simplejson.loads(wq.content)
-while wq1['SUMMARY']['NUMBER_OF_OBJECTS'] == 0:
-    random_station = random.choice(sq1['STATION'])
-    stid = random_station['STID']
-    # print(stid)
-    wq = requests.get(baseURL+'timeseries?'+parameters+'&stid='+stid)
-    wq1 = simplejson.loads(wq.content)
-    try:
-        wqtemp = wq1['STATION'][0]['OBSERVATIONS']['air_temp_set_1'][0]
-    except (KeyError, IndexError, TypeError) or \
-            wq1['QC_SUMMARY']['TOTAL_OBSERVATIONS_FLAGGED'] > 0 or \
-            wqtemp < -50 or wqtemp > 150:
+#while wq1['SUMMARY']['NUMBER_OF_OBJECTS'] == 0 or (KeyError, IndexError, TypeError) or \
+#            wq1['STATION'][0]['QC']['air_temp_set_1'][-1] == 'true':
+#    random_station = random.choice(sq1['STATION'])
+#    stid = random_station['STID']
+#    # print(stid)
+#    wq = requests.get(baseURL+'timeseries?'+parameters+'&stid='+stid)
+#    wq1 = simplejson.loads(wq.content)
+try:
+    wqtem = wq1['STATION'][0]['OBSERVATIONS']['air_temp_set_1'][-1]
+except (KeyError, IndexError, TypeError) or wqtemp < -50 or wqtemp > 150 or \
+        wq1['STATION'][0]['QC']['air_temp_set_1'][-1] == true or \
+        wq1['SUMMARY']['NUMBER_OF_OBJECTS'] == 0:
         random_station = random.choice(sq1['STATION'])
         stid = random_station['STID']
         # print(STID)
         wq = requests.get(baseURL+'timeseries?'+parameters+'&stid='+stid)
         wq1 = simplejson.loads(wq.content)
         # wqtemp = wq1['STATION'][0]['OBSERVATIONS']['air_temp_set_1'][0]
-        try:
-            wqtemp = wq1['STATION'][0]['OBSERVATIONS']['air_temp_set_1'][0]
-        except (KeyError, IndexError, TypeError) or \
-                wq1['QC_SUMMARY']['TOTAL_OBSERVATIONS_FLAGGED'] > 0 or \
-                wqtemp < -50 or wqtemp > 150:
-            random_station = random.choice(sq1['STATION'])
-            stid = random_station['STID']
-            # print(STID)
-            wq = requests.get(baseURL+'timeseries?'+parameters+'&stid='+stid)
-            wq1 = simplejson.loads(wq.content)
-            # wqtemp = wq1['STATION'][0]['OBSERVATIONS']['air_temp_set_1'][0]
-            try:
-                wqtemp = wq1['STATION'][0]['OBSERVATIONS']['air_temp_set_1'][0]
-            except (KeyError, IndexError, TypeError) or \
-                    wq1['QC_SUMMARY']['TOTAL_OBSERVATIONS_FLAGGED'] > 0 or \
-                    wqtemp < -50 or wqtemp > 150:
-                random_station = random.choice(sq1['STATION'])
-                stid = random_station['STID']
-                # print(STID)
-                wq = requests.get(baseURL + 'timeseries?' +
-                                  parameters + '&stid=' + stid)
-                wq1 = simplejson.loads(wq.content)
-                wqtemp = wq1['STATION'][0]['OBSERVATIONS']['air_temp_set_1'][0]
-else:
-    wqtemp = round(wq1['STATION'][0]['OBSERVATIONS']['air_temp_set_1'][0], 1)
-    wqtemp1 = str(wqtemp)+u'\N{DEGREE SIGN}'+'F'
+#        try:
+#            wqtemp = wq1['STATION'][0]['OBSERVATIONS']['air_temp_set_1'][-1]
+#        except (KeyError, IndexError, TypeError) or wqtemp < -50 or wqtemp > 150 \
+#                 or wq1['STATION'][0]['QC']['air_temp_set_1'][-1] == true:
+#            random_station = random.choice(sq1['STATION'])
+#            stid = random_station['STID']
+#            # print(STID)
+#            wq = requests.get(baseURL+'timeseries?'+parameters+'&stid='+stid)
+#            wq1 = simplejson.loads(wq.content)
+#            # wqtemp = wq1['STATION'][0]['OBSERVATIONS']['air_temp_set_1'][0]
+#            try:
+#                wqtemp = wq1['STATION'][0]['OBSERVATIONS']['air_temp_set_1'][-1]
+#            except (KeyError, IndexError, TypeError) or \
+#                    wq1['STATION'][0]['QC']['air_temp_set_1'][-1] == true or \
+#                    wqtemp < -50 or wqtemp > 150:
+#                random_station = random.choice(sq1['STATION'])
+#                stid = random_station['STID']
+#                # print(STID)
+#                wq = requests.get(baseURL + 'timeseries?' +
+#                                  parameters + '&stid=' + stid)
+#                wq1 = simplejson.loads(wq.content)
+#                wqtemp = wq1['STATION'][0]['OBSERVATIONS']['air_temp_set_1'][-1]
+wqtemp = round(wq1['STATION'][0]['OBSERVATIONS']['air_temp_set_1'][-1], 1)
+wqtemp1 = str(wqtemp)+u'\N{DEGREE SIGN}'+'F'
 wq1sn = wq1['STATION'][0]['NAME']
 wq1st = wq1['STATION'][0]['STATE']
 mesolink1 = ' http://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=' \
              + stid
 wqresult = 'The current weather at ' + wq1sn + ', '+wq1st+' is ' + wqtemp1 \
            + mesolink1
-#print(wqresult)
-api.update_status(wqresult)
-time.sleep(240)
+print(wqresult)
+#api.update_status(wqresult)
+#time.sleep(240)
 all_states = ['al', 'ak', 'az', 'ar', 'ca', 'co', 'ct', 'de', 'fl', 'ga',
               'hi', 'id', 'il', 'in', 'ia', 'ks', 'ky', 'la', 'me', 'md',
               'ma', 'mi', 'mn', 'ms', 'mo', 'mt', 'ne', 'nv', 'nh', 'nj',
@@ -103,8 +102,8 @@ for i in range(len(r1['STATION'])):
         r2.append(r1['STATION'][i])
 max_t = []
 for j in range(len(r2)):
-    if r2[j]['QC_FLAGGED'] is False:
-        max_t.append(r2[j]['OBSERVATIONS']['air_temp_set_1'][0])
+    if r2[j]['QC_FLAGGED'] is False and r2[j]['OBSERVATIONS']['air_temp_set_1'][-1] is not None:
+        max_t.append(r2[j]['OBSERVATIONS']['air_temp_set_1'][-1])
     mt = max(max_t)
     mi = (max_t).index(mt)
 mt_t = round(mt, 1)
@@ -115,9 +114,9 @@ mesolink2 = ' http://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=' \
              + m_stid
 mtresult = 'The current high temperature in the state of '+m_st+', is ' + \
             str(mt_t) + u'\N{DEGREE SIGN}' + 'F ' + mesolink2
-#print(mtresult)
-api.update_status(mtresult)
-time.sleep(240)
+print(mtresult)
+#api.update_status(mtresult)
+#time.sleep(240)
 random_state2 = random.choice(all_states)
 s = requests.get(baseURL + 'timeseries?&state=' + random_state2 + parameters)
 s1 = simplejson.loads(s.content)
@@ -127,8 +126,8 @@ for i in range(len(s1['STATION'])):
         s2.append(s1['STATION'][i])
 min_t = []
 for j in range(len(s2)):
-    if s2[j]['QC_FLAGGED'] is False:
-        min_t.append(s2[j]['OBSERVATIONS']['air_temp_set_1'][0])
+    if s2[j]['QC_FLAGGED'] is False and s2[j]['OBSERVATIONS']['air_temp_set_1'][-1] is not None:
+        min_t.append(s2[j]['OBSERVATIONS']['air_temp_set_1'][-1])
     mt2 = min(min_t)
     mi2 = (min_t).index(mt2)
 mt2_t = round(mt2, 1)
@@ -139,9 +138,9 @@ mesolink3 = ' http://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=' \
              + m2_stid
 mt2result = 'The current low temperature in the state of ' + m2_st + ', is ' +\
              str(mt2_t)+u'\N{DEGREE SIGN}'+'F ' + mesolink3
-#print(mt2result)
-api.update_status(mt2result)
-time.sleep(240)
+print(mt2result)
+#api.update_status(mt2result)
+#time.sleep(240)
 random_state3 = random.choice(all_states)
 wind = requests.get(baseURL + 'timeseries?&state=' + random_state2 + '&token='+token+'&status=active&' +
                     'units=english&obtimezone=local&qc=all&vars=wind_gust&recent=60')
@@ -152,7 +151,7 @@ for i in range(len(wind1['STATION'])):
         wind2.append(wind1['STATION'][i])
 max_w = []
 for j in range(len(wind2)):
-    if wind2[j]['QC_FLAGGED'] is False:
+    if wind2[j]['QC_FLAGGED'] is False and wind2[j]['OBSERVATIONS']['wind_gust_set_1'][0] is not None:
         max_w.append(wind2[j]['OBSERVATIONS']['wind_gust_set_1'][0])
     mw = max(max_w)
     mwi = (max_w).index(mw)
@@ -165,5 +164,5 @@ mesolink4 = ' http://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=' \
 mwresult = 'The current strongest wind gust in the state of ' + mw_st + ', is ' +\
              str(mw_w)+' mph' + mesolink4
 print(mwresult)
-api.update_status(mwresult)
-sys.exit()
+#api.update_status(mwresult)
+#sys.exit()
