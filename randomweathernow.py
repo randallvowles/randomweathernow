@@ -8,22 +8,18 @@ import sys
 import tweepy
 import requests
 import simplejson
-#import bitly_api
 config = configparser.ConfigParser()
-config.read(r'/uufs/chpc.utah.edu/common/home/u0540701/randomweathernow/rwnconfig.txt')
+config.read(r'/uufs/chpc.utah.edu/common/home/u0540701/randomweathernow/rwnconfig.txt') #.
 CONSUMER_KEY = config.get('rwn', 'CONSUMER_KEY')
 CONSUMER_SECRET = config.get('rwn', 'CONSUMER_SECRET')
 ACCESS_TOKEN = config.get('rwn', 'ACCESS_TOKEN')
 ACCESS_TOKEN_SECRET = config.get('rwn', 'ACCESS_TOKEN_SECRET')
 token = config.get('rwn', 'token')
-#API_USER = config.get(sectionheader[0], 'API_USER')
-#API_KEY = config.get(sectionheader[0], 'API_KEY')
-#b = bitly_api.BitLy(API_USER, API_KEY)
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 api = tweepy.API(auth)
 parameters = '&token='+token+'&status=active&' + \
-            'units=english&obtimezone=local&qc=all&vars=air_temp&recent=120'
+            'units=english&obtimezone=local&qc=all&vars=air_temp&recent=60'
 baseURL = 'http://api.mesowest.net/v2/stations/'
 # blacklist=[134, 203, 192, 92, 106, 48, 77, 126, 211, 197, 146, 196,
 # 131, 23, 72, 208, 169, 80, 65]
@@ -88,12 +84,11 @@ wq1sn = wq1['STATION'][0]['NAME']
 wq1st = wq1['STATION'][0]['STATE']
 mesolink1 = ' http://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=' \
              + stid
-#response1 = b.shorten(longUrl=mesolink1)
 wqresult = 'The current weather at ' + wq1sn + ', '+wq1st+' is ' + wqtemp1 \
            + mesolink1
 #print(wqresult)
 api.update_status(wqresult)
-time.sleep(300)
+time.sleep(240)
 all_states = ['al', 'ak', 'az', 'ar', 'ca', 'co', 'ct', 'de', 'fl', 'ga',
               'hi', 'id', 'il', 'in', 'ia', 'ks', 'ky', 'la', 'me', 'md',
               'ma', 'mi', 'mn', 'ms', 'mo', 'mt', 'ne', 'nv', 'nh', 'nj',
@@ -122,7 +117,7 @@ mtresult = 'The current high temperature in the state of '+m_st+', is ' + \
             str(mt_t) + u'\N{DEGREE SIGN}' + 'F ' + mesolink2
 #print(mtresult)
 api.update_status(mtresult)
-time.sleep(300)
+time.sleep(240)
 random_state2 = random.choice(all_states)
 s = requests.get(baseURL + 'timeseries?&state=' + random_state2 + parameters)
 s1 = simplejson.loads(s.content)
@@ -146,4 +141,29 @@ mt2result = 'The current low temperature in the state of ' + m2_st + ', is ' +\
              str(mt2_t)+u'\N{DEGREE SIGN}'+'F ' + mesolink3
 #print(mt2result)
 api.update_status(mt2result)
+time.sleep(240)
+random_state3 = random.choice(all_states)
+wind = requests.get(baseURL + 'timeseries?&state=' + random_state2 + '&token='+token+'&status=active&' +
+                    'units=english&obtimezone=local&qc=all&vars=wind_gust&recent=60')
+wind1 = simplejson.loads(wind.content)
+wind2 = []
+for i in range(len(wind1['STATION'])):
+    if int(wind1['STATION'][i]['MNET_ID']) in good_networks:
+        wind2.append(wind1['STATION'][i])
+max_w = []
+for j in range(len(wind2)):
+    if wind2[j]['QC_FLAGGED'] is False:
+        max_w.append(wind2[j]['OBSERVATIONS']['wind_gust_set_1'][0])
+    mw = max(max_w)
+    mwi = (max_w).index(mw)
+mw_w = round(mw, 1)
+mw_name = wind2[mwi]['NAME']
+mw_stid = wind2[mwi]['STID']
+mw_st = wind2[mwi]['STATE']
+mesolink4 = ' http://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=' \
+             + mw_stid
+mwresult = 'The current strongest wind gust in the state of ' + mw_st + ', is ' +\
+             str(mw_w)+' mph' + mesolink4
+print(mwresult)
+api.update_status(mwresult)
 sys.exit()
