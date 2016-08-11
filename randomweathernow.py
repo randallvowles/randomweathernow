@@ -1,4 +1,4 @@
-#!/uufs/chpc.utah.edu/common/home/u0540701/MyVenv/bin/python3
+#!/uufs/chpc.utah.edu/common/home/u0540701/MyVenv/bin/python
 
 # Created by Randall Vowles, API token and twitter account belong to me
 import configparser
