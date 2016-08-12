@@ -9,7 +9,7 @@ import tweepy
 import requests
 import simplejson
 config = configparser.ConfigParser()
-config.read(r'./rwnconfig.txt') #/uufs/chpc.utah.edu/common/home/u0540701/randomweathernow
+config.read(r'/uufs/chpc.utah.edu/common/home/u0540701/randomweathernow/rwnconfig.txt') #.
 CONSUMER_KEY = config.get('rwn', 'CONSUMER_KEY')
 CONSUMER_SECRET = config.get('rwn', 'CONSUMER_SECRET')
 ACCESS_TOKEN = config.get('rwn', 'ACCESS_TOKEN')
