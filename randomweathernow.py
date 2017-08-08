@@ -7,19 +7,19 @@ import time
 import sys
 import tweepy
 import requests
-import simplejson
+import numpy
 config = configparser.ConfigParser()
-config.read(r'/uufs/chpc.utah.edu/common/home/u0540701/randomweathernow/rwnconfig.txt') #.
+config.read(r'./rwnconfig.txt') #/uufs/chpc.utah.edu/common/home/u0540701/randomweathernow
 CONSUMER_KEY = config.get('rwn', 'CONSUMER_KEY')
 CONSUMER_SECRET = config.get('rwn', 'CONSUMER_SECRET')
 ACCESS_TOKEN = config.get('rwn', 'ACCESS_TOKEN')
 ACCESS_TOKEN_SECRET = config.get('rwn', 'ACCESS_TOKEN_SECRET')
-token = config.get('rwn', 'token')
+token = config.get('rwn', 'API_TOKEN')
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 api = tweepy.API(auth)
 parameters = '&token='+token+'&status=active&' + \
-            'units=english&obtimezone=local&qc=all&vars=air_temp&recent=60'
+            'units=english&obtimezone=local&vars=air_temp&recent=60&qc=on'
 baseURL = 'http://api.mesowest.net/v2/stations/'
 # blacklist=[134, 203, 192, 92, 106, 48, 77, 126, 211, 197, 146, 196,
 # 131, 23, 72, 208, 169, 80, 65]
@@ -31,12 +31,12 @@ good_networks = [1, 2, 3, 4, 5, 8, 11, 13, 15, 16, 17, 22, 25, 26, 29, 36, 39,
                  188, 191, 194, 195, 199, 201, 206, 207, 209, 212, 213]
 network_id = random.choice(good_networks)
 sq = requests.get(baseURL+'metadata?'+parameters+'&network='+str(network_id))
-sq1 = simplejson.loads(sq.content)
+sq1 = sq.json()
 random_station = random.choice(sq1['STATION'])
 stid = random_station['STID']
 # print(stid)
 wq = requests.get(baseURL + 'timeseries?' + parameters + '&stid=' + stid)
-wq1 = simplejson.loads(wq.content)
+wq1 = wq.json()
 #while wq1['SUMMARY']['NUMBER_OF_OBJECTS'] == 0 or (KeyError, IndexError, TypeError) or \
 #            wq1['STATION'][0]['QC']['air_temp_set_1'][-1] == 'true':
 #    random_station = random.choice(sq1['STATION'])
@@ -45,16 +45,16 @@ wq1 = simplejson.loads(wq.content)
 #    wq = requests.get(baseURL+'timeseries?'+parameters+'&stid='+stid)
 #    wq1 = simplejson.loads(wq.content)
 try:
-    wqtem = wq1['STATION'][0]['OBSERVATIONS']['air_temp_set_1'][-1]
+   wqtem = wq1['STATION'][0]['OBSERVATIONS']['air_temp_set_1'][-1]
 except (KeyError, IndexError, TypeError) or wqtemp < -50 or wqtemp > 150 or \
-        wq1['STATION'][0]['QC']['air_temp_set_1'][-1] == true or \
-        wq1['SUMMARY']['NUMBER_OF_OBJECTS'] == 0:
-        random_station = random.choice(sq1['STATION'])
-        stid = random_station['STID']
-        # print(STID)
-        wq = requests.get(baseURL+'timeseries?'+parameters+'&stid='+stid)
-        wq1 = simplejson.loads(wq.content)
-        # wqtemp = wq1['STATION'][0]['OBSERVATIONS']['air_temp_set_1'][0]
+       wq1['STATION'][0]['QC']['air_temp_set_1'][-1] == true or \
+       wq1['SUMMARY']['NUMBER_OF_OBJECTS'] == 0:
+       random_station = random.choice(sq1['STATION'])
+       stid = random_station['STID']
+       # print(STID)
+       wq = requests.get(baseURL+'timeseries?'+parameters+'&stid='+stid)
+       wq1 = wq.json()
+       # wqtemp = wq1['STATION'][0]['OBSERVATIONS']['air_temp_set_1'][0]
 #        try:
 #            wqtemp = wq1['STATION'][0]['OBSERVATIONS']['air_temp_set_1'][-1]
 #        except (KeyError, IndexError, TypeError) or wqtemp < -50 or wqtemp > 150 \
@@ -82,87 +82,87 @@ wqtemp1 = str(wqtemp)+u'\N{DEGREE SIGN}'+'F'
 wq1sn = wq1['STATION'][0]['NAME']
 wq1st = wq1['STATION'][0]['STATE']
 mesolink1 = ' http://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=' \
-             + stid
+            + stid
 wqresult = 'The current weather at ' + wq1sn + ', '+wq1st+' is ' + wqtemp1 \
-           + mesolink1
-#print(wqresult)
+          + mesolink1
+print(wqresult)
 api.update_status(wqresult)
-time.sleep(240)
+# time.sleep(240)
 all_states = ['al', 'ak', 'az', 'ar', 'ca', 'co', 'ct', 'de', 'fl', 'ga',
               'hi', 'id', 'il', 'in', 'ia', 'ks', 'ky', 'la', 'me', 'md',
               'ma', 'mi', 'mn', 'ms', 'mo', 'mt', 'ne', 'nv', 'nh', 'nj',
               'nm', 'ny', 'nc', 'nd', 'oh', 'ok', 'or', 'pa', 'ri', 'sc',
-              'sd', 'tn', 'tx', 'ut', 'vt', 'va', 'wa', 'wv', 'wi', 'wy', 'dc']
+              'sd', 'tn', 'tx', 'ut', 'vt', 'va', 'wa', 'wv', 'wi', 'wy']
 random_state = random.choice(all_states)
-r = requests.get(baseURL + 'timeseries?&state=' + random_state + parameters)
-r1 = simplejson.loads(r.content)
+r = requests.get(baseURL + 'timeseries?&state=' + random_state + parameters + '&network=1,2')
+r1 = r.json()
 r2 = []
-for i in range(len(r1['STATION'])):
-    if int(r1['STATION'][i]['MNET_ID']) in good_networks:
-        r2.append(r1['STATION'][i])
+#for i in range(len(r1['STATION'])):
+#    if int(r1['STATION'][i]['MNET_ID']) in good_networks:
+#        r2.append(r1['STATION'][i])
 max_t = []
-for j in range(len(r2)):
-    if r2[j]['QC_FLAGGED'] is False and r2[j]['OBSERVATIONS']['air_temp_set_1'][-1] is not None:
-        max_t.append(r2[j]['OBSERVATIONS']['air_temp_set_1'][-1])
-    mt = max(max_t)
-    mi = (max_t).index(mt)
+for j in range(len(r1['STATION'])):
+    if r1['STATION'][j]['QC_FLAGGED'] is False and r1['STATION'][j]['OBSERVATIONS']['air_temp_set_1'][-1] is not None:
+        max_t.append(r1['STATION'][j]['OBSERVATIONS']['air_temp_set_1'][-1])
+        mt = (max(max_t))
+        mi = (max_t).index(mt)
 mt_t = round(mt, 1)
-m_name = r2[mi]['NAME']
-m_stid = r2[mi]['STID']
-m_st = r2[mi]['STATE']
+m_name = r1['STATION'][mi]['NAME']
+m_stid = r1['STATION'][mi]['STID']
+m_st = r1['STATION'][mi]['STATE']
 mesolink2 = ' http://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=' \
              + m_stid
 mtresult = 'The current high temperature in the state of '+m_st+', is ' + \
             str(mt_t) + u'\N{DEGREE SIGN}' + 'F ' + mesolink2
-#print(mtresult)
+print(mtresult)
 api.update_status(mtresult)
-time.sleep(240)
+# time.sleep(240)
 random_state2 = random.choice(all_states)
 s = requests.get(baseURL + 'timeseries?&state=' + random_state2 + parameters)
-s1 = simplejson.loads(s.content)
+s1 = s.json()
 s2 = []
 for i in range(len(s1['STATION'])):
-    if int(s1['STATION'][i]['MNET_ID']) in good_networks:
-        s2.append(s1['STATION'][i])
+   if int(s1['STATION'][i]['MNET_ID']) in good_networks:
+       s2.append(s1['STATION'][i])
 min_t = []
 for j in range(len(s2)):
-    if s2[j]['QC_FLAGGED'] is False and s2[j]['OBSERVATIONS']['air_temp_set_1'][-1] is not None:
-        min_t.append(s2[j]['OBSERVATIONS']['air_temp_set_1'][-1])
-    mt2 = min(min_t)
-    mi2 = (min_t).index(mt2)
+   if s2[j]['QC_FLAGGED'] is False and s2[j]['OBSERVATIONS']['air_temp_set_1'][-1] is not None:
+       min_t.append(s2[j]['OBSERVATIONS']['air_temp_set_1'][-1])
+   mt2 = min(min_t)
+   mi2 = (min_t).index(mt2)
 mt2_t = round(mt2, 1)
 m2_name = s2[mi2]['NAME']
 m2_stid = s2[mi2]['STID']
 m2_st = s2[mi2]['STATE']
 mesolink3 = ' http://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=' \
-             + m2_stid
+            + m2_stid
 mt2result = 'The current low temperature in the state of ' + m2_st + ', is ' +\
-             str(mt2_t)+u'\N{DEGREE SIGN}'+'F ' + mesolink3
-#print(mt2result)
+            str(mt2_t)+u'\N{DEGREE SIGN}'+'F ' + mesolink3
+print(mt2result)
 api.update_status(mt2result)
-time.sleep(240)
+#time.sleep(240)
 random_state3 = random.choice(all_states)
 wind = requests.get(baseURL + 'timeseries?&state=' + random_state2 + '&token='+token+'&status=active&' +
-                    'units=english&obtimezone=local&qc=all&vars=wind_gust&recent=60')
-wind1 = simplejson.loads(wind.content)
+                   'units=english&obtimezone=local&qc=on&vars=wind_gust&recent=60')
+wind1 = wind.json()
 wind2 = []
 for i in range(len(wind1['STATION'])):
-    if int(wind1['STATION'][i]['MNET_ID']) in good_networks:
-        wind2.append(wind1['STATION'][i])
+   if int(wind1['STATION'][i]['MNET_ID']) in good_networks:
+       wind2.append(wind1['STATION'][i])
 max_w = []
 for j in range(len(wind2)):
-    if wind2[j]['QC_FLAGGED'] is False and wind2[j]['OBSERVATIONS']['wind_gust_set_1'][0] is not None:
-        max_w.append(wind2[j]['OBSERVATIONS']['wind_gust_set_1'][0])
-    mw = max(max_w)
-    mwi = (max_w).index(mw)
+   if wind2[j]['QC_FLAGGED'] is False and wind2[j]['OBSERVATIONS']['wind_gust_set_1'][0] is not None:
+       max_w.append(wind2[j]['OBSERVATIONS']['wind_gust_set_1'][0])
+   mw = max(max_w)
+   mwi = (max_w).index(mw)
 mw_w = round(mw, 1)
 mw_name = wind2[mwi]['NAME']
 mw_stid = wind2[mwi]['STID']
 mw_st = wind2[mwi]['STATE']
 mesolink4 = ' http://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=' \
-             + mw_stid
+            + mw_stid
 mwresult = 'The current strongest wind gust in the state of ' + mw_st + ', is ' +\
-             str(mw_w)+' mph' + mesolink4
-#print(mwresult)
-api.update_status(mwresult)
-sys.exit()
+            str(mw_w)+' mph' + mesolink4
+print(mwresult)
+#api.update_status(mwresult)
+##sys.exit()
