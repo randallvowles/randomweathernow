@@ -37,8 +37,8 @@ all_states = ['al', 'ak', 'az', 'ar', 'ca', 'co', 'ct', 'de',
               'wi', 'wy']
 error_log = open('./error_log.txt', 'a')
 baseurl = 'http://api.mesowest.net/v2/stations/timeseries'
-#case_n = random.choice([1, 2, 3, 4])
-case_n = 4
+case_n = random.choice([1, 2, 3, 4])
+#case_n = 4
 #results1 = {}
 #parameters = {}
 #api_url = ''
@@ -64,7 +64,7 @@ def findExtreme(results1):
         max_temp = _temp
         stid_max = _stid
         print stid_max, max_temp
-        return stid_max, max_temp
+        return [stid_max, max_temp]
     elif case_n == 3:
         for i in range(len(results1['STATION'])):
             a = len(results1['STATION'][i]['OBSERVATIONS'][variable + '_set_1']) - 1
@@ -76,13 +76,13 @@ def findExtreme(results1):
         min_temp = _temp
         stid_min = _stid
         print stid_min, min_temp
-        return stid_min, min_temp
+        return [stid_min, min_temp]
 
 
 def apiCall(PARAMETERS):
     results = requests.get(baseurl, params=PARAMETERS)
     results1 = results.json()
-#    findExtreme(results1)
+    findExtreme(results1)
     return results1
 
 
@@ -119,9 +119,9 @@ elif case_n == 4:
 def create30DayPlot(results):
     x = [md.date2num(datetime.datetime.strptime(val,'%Y-%m-%dT%H:%M:%SZ')) for val in results['STATION'][0]['OBSERVATIONS']['date_time']]
 #    print results
-    hour=md.HourLocator(interval=24)
-    fmt=md.DateFormatter('%m-%d')
-    fig,ax=plt.subplots()
+    hour = md.HourLocator(interval=24)
+    fmt = md.DateFormatter('%m-%d')
+    fig, ax = plt.subplots()
     ax.plot(x, (results['STATION'][0]['OBSERVATIONS'][variable + '_set_1']), 'b-')
     plt.title('Temperatures at ' + results['STATION'][0]['NAME'])
     plt.ylabel('Temperature (' + u'\N{DEGREE SIGN}' + 'F)')
@@ -134,20 +134,22 @@ def create30DayPlot(results):
     plt.show()
 
 
-def findCity(results1):
-    lat = results1['STATION'][0]['LATITUDE']
-    lon = results1['STATION'][0]['LONGITUDE']
+def findCity(stid):
+    r1 = requests.get(baseurl, params={"stid": stid, "recent": 120})
+    r2 = r1.json()
+    lat = r2['STATION'][0]['LATITUDE']
+    lon = r2['STATION'][0]['LONGITUDE']
     try:
-        loc = requests.get('https://maps.googleapis.com/maps/api/geocode/json?latlng='+ lat +','+ lon +'key='+ gps_token)
+        loc = requests.get('https://maps.googleapis.com/maps/api/geocode/json?latlng=' + lat + ',' + lon + 'key=' + gps_token)
         loc1 = loc.json()
         loc_city = loc1['results'][0]['address_components'][2]['long_name']
         return loc_city
     except:
-        loc_city = results1['STATION'][0]['STID']
+        loc_city = r2['STATION'][0]['NAME']
         return loc_city
 
 
-def sendToTwitter(result_tw):
+def sendToTwitter():
 #    DATETIME = results1['STATION'][0]['OBSERVATIONS']['date_time'][-1]
 #    DATETIME_P = arrow.get(DATETIME)
 #    LINKBASE = 'mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi'
@@ -157,31 +159,65 @@ def sendToTwitter(result_tw):
 #                  'year1': str(DATETIME_P.year), 'hour1': str(DATETIME_P.hour)}
 #    TR = urllib.urlopen(LINKBASE, params=LINKPARAMS)
 #    LONGURL = requests.utils.get_unicode_from_response(TR)
-    loc_st = result_tw['STATION'][0]['STATE']
-    stid = result_tw['STATION'][0]['STID']
+
+    loc_st = random_state.upper()
+#    stid = result_tw['STATION'][0]['STID']
     start_time = datetime.date.today().strftime('%Y%m%d%H%M')
     end_time = (datetime.datetime.now()).strftime('%Y%m%d%H%M')
-    long_url = "https://synopticlabs.org/demos/tabtable/?stid" + stid + "&start=" + start_time + "&end=" + end_time
-    BITLYR = requests.get('https://api-ssl.bitly.com/v3/shorten?access_token='+
-                          bitlytoken + '&longUrl=' + long_url + '%2F&format=txt')
-    linkurl = str(BITLYR.text)
-    hashtag = ' #'+loc_st+'wx'
+
+
     if case_n == 1:
-        tweet = 'The current temperature at ' + findCity(result_tw) + ', ' + loc_st +' is '\
-                 + result_tw + u'\N{DEGREE SIGN}' + 'F ' + hashtag + linkurl
+        results_1 = apiCall(parameters)
+        stid = results_1['STATION'][0]['STID']
+        a = len(results_1['STATION'][0]['OBSERVATIONS'][variable + '_set_1']) - 1
+        tw_ob = results_1['STATION'][0]['OBSERVATIONS'][variable + '_set_1'][a]
+        long_url = "https://synopticlabs.org/demos/tabtable/?stid=" + stid + "&start=" + start_time + "&end=" + end_time
+        BITLYR = requests.get('https://api-ssl.bitly.com/v3/shorten?access_token=' +
+                              bitlytoken + '&longUrl=' + long_url + '%2F&format=txt')
+        linkurl = str(BITLYR.text)
+        hashtag = ' #' + results_1['STATION'][0]['STATE'] + 'wx '
+        tweet = 'The current temperature at ' + findCity(stid) + ', ' + loc_st + ' is '\
+                 + tw_ob + u'\N{DEGREE SIGN}' + 'F ' + hashtag + linkurl
+        api.update_status(tweet)
     elif case_n == 2:
+#        apiCall(parameters)
+        stid = findExtreme(apiCall(parameters))[0]
+        tw_ob = str(findExtreme(apiCall(parameters))[1])
+        long_url = "https://synopticlabs.org/demos/tabtable/?stid=" + stid + "&start=" + start_time + "&end=" + end_time
+        BITLYR = requests.get('https://api-ssl.bitly.com/v3/shorten?access_token=' +
+                              bitlytoken + '&longUrl=' + long_url + '%2F&format=txt')
+        linkurl = str(BITLYR.text)
+        hashtag = ' #'+loc_st+'wx '
         tweet = 'The state of '+ loc_st +' currently has a high temperature of '+\
-                result_tw + u'\N{DEGREE SIGN}' + 'F ' + hashtag + linkurl
+                tw_ob + u'\N{DEGREE SIGN}' + 'F ' + hashtag + linkurl
+        api.update_status(tweet)
     elif case_n == 3:
+#        apiCall(parameters)
+        stid = findExtreme(apiCall(parameters))[0]
+        tw_ob = str(findExtreme(apiCall(parameters))[1])
+        long_url = "https://synopticlabs.org/demos/tabtable/?stid=" + stid + "&start=" + start_time + "&end=" + end_time
+        BITLYR = requests.get('https://api-ssl.bitly.com/v3/shorten?access_token=' +
+                              bitlytoken + '&longUrl=' + long_url + '%2F&format=txt')
+        linkurl = str(BITLYR.text)
+        hashtag = ' #'+loc_st+'wx '
         tweet = 'The state of '+ loc_st +' currently has a low temperature of '+\
-                result_tw + u'\N{DEGREE SIGN}' + 'F ' + hashtag + linkurl
-#    elif case_n == 4:
-#        tweet = 'The current strongest wind gust in ' + loc_st + \
-#                ' is ' + result_tw + ' mph' + hashtag + linkurl
-    api.update_status(tweet)
+                tw_ob + u'\N{DEGREE SIGN}' + 'F ' + hashtag + linkurl
+        api.update_status(tweet)
+    elif case_n == 4:
+        results_1 = apiCall(parameters)
+        stid = results_1['STATION'][0]['STID']
+        long_url = "https://synopticlabs.org/demos/tabtable/?stid=" + stid + "&start=" + start_time + "&end=" + end_time
+        BITLYR = requests.get('https://api-ssl.bitly.com/v3/shorten?access_token=' +
+                              bitlytoken + '&longUrl=' + long_url + '%2F&format=txt')
+        linkurl = str(BITLYR.text)
+        hashtag = ' #' + results_1['STATION'][0]['STATE'] + 'wx '
+        create30DayPlot(results_1)
+        tweet = 'Check out the temperature over the past month at ' + results_1['STATION'][0]['STATE'] + \
+                hashtag + linkurl
+        api.update_with_media('30_day_image.png', tweet)
 
 
 
-create30DayPlot(apiCall(parameters))
+sendToTwitter()
 
 

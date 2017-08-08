@@ -1,5 +1,5 @@
 SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 MAILTO=randomweathernow@gmail.com
-*/15 * * * * /uufs/chpc.utah.edu/common/home/u0540701/randomweathernow/randomweathernow.py > /uufs/chpc.utah.edu/common/home/u0540701/randomweathernow/randomlog.log 2>&1
+*/5 * * * * /uufs/chpc.utah.edu/common/home/u0540701/randomweathernow/randomweathernow.py > /uufs/chpc.utah.edu/common/home/u0540701/randomweathernow/randomlog.log 2>&1
 
