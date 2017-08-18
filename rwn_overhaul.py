@@ -3,6 +3,7 @@
 # Created by Randall Vowles, API token and twitter account belong to me
 import configparser
 import random
+import json
 import tweepy
 import datetime
 from datetime import date
@@ -18,8 +19,12 @@ consumer_secret = config.get('rwn', 'CONSUMER_SECRET')
 access_token = config.get('rwn', 'ACCESS_TOKEN')
 access_token_secret = config.get('rwn', 'ACCESS_TOKEN_SECRET')
 api_token = config.get('rwn', 'API_TOKEN')
+darksky_api = config.get('rwn', 'DARKSKY_KEY')
+darksky_url = "https://api.darksky.net/forecast/" + darksky_api + "/"
 bitlytoken = config.get('rwn', 'BITLYTOKEN')
 gps_token = config.get('rwn', 'GPS_TOKEN')
+with open('capitals.json') as data_file:
+    capitals = json.load(data_file)
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)
 api = tweepy.API(auth)
@@ -30,10 +35,11 @@ all_states = ['al', 'ak', 'az', 'ar', 'ca', 'co', 'ct', 'de',
               'nc', 'nd', 'oh', 'ok', 'or', 'pa', 'ri', 'sc',
               'sd', 'tn', 'tx', 'ut', 'vt', 'va', 'wa', 'wv',
               'wi', 'wy']
+
 # error_log = open('./error_log.txt', 'a')
 baseurl = 'http://api.mesowest.net/v2/stations/timeseries'
-# case_n = random.choice([1, 2, 3, 4, 5, 6, 7])
-case_n = 7
+case_n = random.choice([1, 2, 3, 4, 5, 6, 7, 8])
+#case_n = 8
 # results1 = {}
 # parameters = {}
 # api_url = ''
@@ -155,7 +161,6 @@ def create30DayPlot(results):
         ax.xaxis.set_major_locator(hour)
         ax.xaxis.set_major_formatter(fmt)
         fig.autofmt_xdate(rotation=90)
-        plt.legend(loc=0)
         plt.savefig('14_day_image.png', bbox_inches='tight')
         #    plt.show()
 
@@ -208,16 +213,20 @@ def findCity(stid):
     r2 = r1.json()
     lat = r2['STATION'][0]['LATITUDE']
     lon = r2['STATION'][0]['LONGITUDE']
-    try:
-        loc = requests.get('https://maps.googleapis.com/maps/' +
-                           'api/geocode/json?latlng=' + lat +
-                           ',' + lon + '&key=' + gps_token)
-        loc1 = loc.json()
-        loc_city = loc1['results'][1]['address_components'][0]['long_name']
-        return loc_city
-    except:
-        loc_city = r2['STATION'][0]['NAME']
-        return loc_city
+    loc = requests.get('https://maps.googleapis.com/maps/' +
+                       'api/geocode/json?latlng=' + lat +
+                       ',' + lon + '&key=' + gps_token)
+#    print loc.url
+    loc1 = loc.json()
+#    loc_city = loc1['results'][1]['address_components'][0]['long_name']
+    loc_city = r2['STATION'][0]['NAME']
+    for i in range(len(loc1['results'])):
+        if loc1['results'][i]['types'][0] == "locality":
+            loc_city = loc1['results'][i]['address_components'][0]['short_name']
+        else:
+            continue
+#    print loc_city
+    return loc_city
 
 
 def sendToTwitter():
@@ -239,11 +248,11 @@ def sendToTwitter():
                     stid + "&start=" + start_time + "&end=" + end_time)
         hashtag = (' #' + (results_1['STATION'][0]['STATE'])
                    .lower() + 'wx ')
-        tweet = ('The current temperature at ' + (stid) +
+        tweet = ('The current temperature at ' + findCity(stid) +
                  ', ' + state_1 + ' is ' + tw_ob + u'\N{DEGREE SIGN}' +
                  'F ' + hashtag + long_url)
-#        print tweet
-        api.update_status(tweet)
+        print tweet
+#        api.update_status(tweet)
 
     elif case_n == 2:
 #        apiCall(parameters)
@@ -256,9 +265,9 @@ def sendToTwitter():
         hashtag = ' #'+loc_st+'wx '
         tweet = ('The state of ' + loc_st.upper() +
                  ' currently has a high temperature of ' +
-                 tw_ob + u'\N{DEGREE SIGN}' + 'F ' + hashtag + long_url)
-#        print tweet
-        api.update_status(tweet)
+                 tw_ob + u'\N{DEGREE SIGN}' + 'F, at '+ findCity(stid) + hashtag + long_url)
+        print tweet
+#        api.update_status(tweet)
 
     elif case_n == 3:
 #        apiCall(parameters)
@@ -271,9 +280,9 @@ def sendToTwitter():
         hashtag = ' #'+loc_st+'wx '
         tweet = ('The state of ' + loc_st.upper() +
                  ' currently has a low temperature of ' +
-                 tw_ob + u'\N{DEGREE SIGN}' + 'F ' + hashtag + long_url)
-#        print tweet
-        api.update_status(tweet)
+                 tw_ob + u'\N{DEGREE SIGN}' + 'F, at '+ findCity(stid) + hashtag + long_url)
+        print tweet
+#        api.update_status(tweet)
 
     elif case_n == 4:
         results_4 = apiCall(parameters)
@@ -284,7 +293,7 @@ def sendToTwitter():
         hashtag = ' #' + (results_4['STATION'][0]['STATE']).lower() + 'wx '
         create30DayPlot(results_4)
         tweet = ('Check out the temperature over the past fortnight at ' +
-                 stid + hashtag + long_url)
+                 findCity(stid) + hashtag + long_url)
 #        print tweet
         api.update_with_media('14_day_image.png', tweet)
 
@@ -297,9 +306,9 @@ def sendToTwitter():
         hashtag = ' #' + (results_5['STATION'][0]['STATE']).lower() + 'wx '
         create7DayPlot(results_5)
         tweet = ('Check out the temperature and moisture over the past three days at ' +
-                 stid + hashtag + long_url)
-#        print tweet
-        api.update_with_media('3_day_image.png', tweet)
+                 findCity(stid) + hashtag + long_url)
+        print tweet
+#        api.update_with_media('3_day_image.png', tweet)
 
     elif case_n == 6:
         stid = random_stid
@@ -321,10 +330,10 @@ def sendToTwitter():
                     stid + "&start=" + start_time + "&end=" + end_time)
         hashtag = ' #' + (r2['STATION'][0]['STATE']).lower() + 'wx '
         tweet = ('Today it is ' + new_ob + u'\N{DEGREE SIGN}' +
-                 'F at ' + stid + ', 1 year ago today it was ' +
+                 'F at ' + findCity(stid) + ', 1 year ago today it was ' +
                  old_ob + u'\N{DEGREE SIGN}' + 'F ' + hashtag + long_url)
-#        print tweet
-        api.update_status(tweet)
+        print tweet
+#        api.update_status(tweet)
 
     elif case_n == 7:
         stid = random_stid
@@ -365,12 +374,25 @@ def sendToTwitter():
         long_url = ("https://synopticlabs.org/demos/tabtable/?stid=" +
                     stid + "&start=" + start_time + "&end=" + end_time)
         hashtag = ' #' + (r2['STATION'][0]['STATE']).lower() + 'wx '
-        tweet = ('Over the past year at ' + r2['STATION'][0]['STID'] +
+        tweet = ('Over the past year at ' + (r2['STATION'][0]['STID']) +
                  ', the highest temp was ' + str(_highTemp) +
                  u'\N{DEGREE SIGN}' + 'F on ' + _highDate +
                  ' and the lowest temp was ' + str(_lowTemp) +
                  u'\N{DEGREE SIGN}' + 'F on ' + _lowDate + hashtag)
-#        print tweet
-        api.update_status(tweet)
+        print tweet
+#        api.update_status(tweet)
+
+    elif case_n == 8:
+        state = random_state
+        state_info = capitals[state.upper()]
+        print state_info
+        r1 = requests.get(darksky_url + state_info['lat'] + ',' + state_info['long'])
+        r2 = r1.json()
+        hashtag = ' #' + state + 'wx '
+        tweet = 'The forecast for ' + state_info['capital'] + ', ' + state.upper() + ' is ' + r2['daily']['summary'] + hashtag
+        print tweet
+#        api.update_status(tweet)
+
 
 sendToTwitter()
+
