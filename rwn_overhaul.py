@@ -98,7 +98,6 @@ def findExtreme(results1):
 def apiCall(PARAMETERS):
     results = requests.get(baseurl, params=PARAMETERS)
     results1 = results.json()
-    findExtreme(results1)
     return results1
 
 
@@ -218,7 +217,6 @@ def findCity(stid):
                        ',' + lon + '&key=' + gps_token)
 #    print loc.url
     loc1 = loc.json()
-#    loc_city = loc1['results'][1]['address_components'][0]['long_name']
     loc_city = r2['STATION'][0]['NAME']
     for i in range(len(loc1['results'])):
         if loc1['results'][i]['types'][0] == "locality":
@@ -329,7 +327,7 @@ def sendToTwitter():
         long_url = ("https://synopticlabs.org/demos/tabtable/?stid=" +
                     stid + "&start=" + start_time + "&end=" + end_time)
         hashtag = ' #' + (r2['STATION'][0]['STATE']).lower() + 'wx '
-        tweet = ('Today it is ' + new_ob + u'\N{DEGREE SIGN}' +
+        tweet = ('Right now it is ' + new_ob + u'\N{DEGREE SIGN}' +
                  'F at ' + findCity(stid) + ', 1 year ago today it was ' +
                  old_ob + u'\N{DEGREE SIGN}' + 'F ' + hashtag + long_url)
         print tweet
@@ -392,6 +390,11 @@ def sendToTwitter():
         tweet = 'The forecast for ' + state_info['capital'] + ', ' + state.upper() + ' is ' + r2['daily']['summary'] + hashtag
         print tweet
 #        api.update_status(tweet)
+
+    elif case_n == 9:
+        # state high and low over past year
+        # request data 3 months at a time and combine
+        # then use findExtreme()
 
 
 sendToTwitter()
