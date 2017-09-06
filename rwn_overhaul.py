@@ -391,7 +391,7 @@ def sendToTwitter():
         print tweet
 #        api.update_status(tweet)
 
-    elif case_n == 9:
+#    elif case_n == 9:
         # state high and low over past year
         # request data 3 months at a time and combine
         # then use findExtreme()
@@ -399,3 +399,5 @@ def sendToTwitter():
 
 sendToTwitter()
 
+# TODO: check qc for errors (illogical temp in september)
+# round temperatures to one decimal place (not two)
