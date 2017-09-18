@@ -25,6 +25,9 @@ bitlytoken = config.get('rwn', 'BITLYTOKEN')
 gps_token = config.get('rwn', 'GPS_TOKEN')
 with open('capitals.json') as data_file:
     capitals = json.load(data_file)
+with open('random_cities.json') as data_file1:
+    random_cities = json.load(data_file1)
+randomCity = random.choice(random_cities)
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)
 api = tweepy.API(auth)
@@ -38,8 +41,8 @@ all_states = ['al', 'ak', 'az', 'ar', 'ca', 'co', 'ct', 'de',
 
 # error_log = open('./error_log.txt', 'a')
 baseurl = 'http://api.mesowest.net/v2/stations/timeseries'
-case_n = random.choice([1, 2, 3, 4, 5, 6, 7, 8])
-#case_n = 8
+#case_n = random.choice([1, 2, 3, 4, 5, 6, 7, 8])
+case_n = 8
 # results1 = {}
 # parameters = {}
 # api_url = ''
@@ -381,13 +384,11 @@ def sendToTwitter():
 #        api.update_status(tweet)
 
     elif case_n == 8:
-        state = random_state
-        state_info = capitals[state.upper()]
-        print state_info
-        r1 = requests.get(darksky_url + state_info['lat'] + ',' + state_info['long'])
+        state = randomCity["ST"]
+        r1 = requests.get(darksky_url + str(randomCity['lat']) + ',' + str(randomCity['lon']))
         r2 = r1.json()
-        hashtag = ' #' + state + 'wx '
-        tweet = 'The forecast for ' + state_info['capital'] + ', ' + state.upper() + ' is ' + r2['daily']['summary'] + hashtag
+        hashtag = ' #' + state.lower() + 'wx #darksky'
+        tweet = 'The forecast for ' + randomCity['City'] + ', ' + state + ' is ' + r2['daily']['summary'] + hashtag
         print tweet
 #        api.update_status(tweet)
 
@@ -401,3 +402,7 @@ sendToTwitter()
 
 # TODO: check qc for errors (illogical temp in september)
 # round temperatures to one decimal place (not two)
+# better handling of "None" slipping through
+# monthly high/low temp (similar to yearly high/low)
+# for graphs use time string from graph query for link_url (3 days, 14 days)
+# add 7 day wind speed, gust, and directional graphs
